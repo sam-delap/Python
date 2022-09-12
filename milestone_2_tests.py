@@ -32,5 +32,10 @@ class TestPeopleActions(unittest.TestCase):
         '''If a player hits, the computer tells them they hit'''
         self.assertEqual(m2.player_choice('hit', self.player, self.dealer, self.deck), "Hit!")
 
+    def test_player_stand_computer_says_stand(self):
+        '''If a player stands, the computer tells them they stood'''
+        m2.player_bet(self.player, self.dealer, self.deck, 500)
+        self.assertEqual(m2.player_choice('stand', self.player, self.dealer, self.deck), "Stand!")
+
 if __name__ == "__main__":
     unittest.main()

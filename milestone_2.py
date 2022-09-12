@@ -55,7 +55,7 @@ class Dealer(Person):
     def hand_value(self):
         '''Check the value of the dealer's hand'''
         if self.show:
-            super().hand_value()
+            return super().hand_value()
         return check_card_value(self.hand[0])
 
     def show_hand(self):
@@ -64,12 +64,18 @@ class Dealer(Person):
             super().show_hand()
         return f"{check_card_value(self.hand[0])}{check_card_symbol(self.hand[0])} ?"
 
+    def deal_hand(self, deck):
+        '''Handle the dealer's hand after the player stands'''
+        self.show = True
+        while self.hand_value() < 17:
+            card = deck.deal()
+            self.hand.append(card)
+
 class Player(Person):
     '''The player(s) at the table'''
     def __init__(self):
         super().__init__()
         self.stack = 1000
-        self.stand = False
         self.bet = 0
         self.play = True
 
@@ -110,14 +116,13 @@ def player_bet(player, dealer, deck, bet):
         dealer.hit(deck)
         return "Bet placed"
 
-def player_choice(choice, player, dealer=Dealer(), deck=None):
+def player_choice(choice, player, dealer=Dealer(), deck=Deck()):
     '''Handles player decisions'''
-    if deck is None:
-        deck = [1, 2]
     if choice == 'hit':
         return player.hit(deck)
     if choice == 'stand':
-        return player_stand(player, dealer, deck)
+        dealer.deal_hand(deck)
+        return "Stand!"
     if choice == 'stack':
         return player.stack
     return "Invalid choice"
@@ -132,13 +137,6 @@ def check_card_suit(card):
     }
 
     return switcher[card // 13]
-
-def player_stand(player, dealer, deck):
-    '''Handles if the player stands'''
-    player.stand = True
-    dealer.show = True
-    handle_dealer_hand(dealer, deck)
-    return "Stand!"
 
 def check_player_win(player, dealer):
     '''Checks the outcome of a hand'''
