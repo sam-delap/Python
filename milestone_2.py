@@ -38,6 +38,7 @@ class Player(Person):
         self.stack = 1000
         self.stand = False
         self.bet = 0
+        self.play = True
 
     def reset(self):
         self.hand = []
@@ -187,8 +188,8 @@ if __name__ == "__main__":
     print_rules()
     player = Player()
 
-    # While the player still has chips
-    while(player.stack > 0):
+    # While the player still has chips and wants to play
+    while(player.stack > 0 and player.play):
         dealer = Dealer()
         deck = Deck()
         while player_place_bet(player, dealer, deck) == "Invalid bet":
@@ -205,3 +206,5 @@ if __name__ == "__main__":
         print(check_player_win(player, dealer))
 
         player.reset()
+
+    print("Thanks for playing!")
