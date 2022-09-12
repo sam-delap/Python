@@ -25,6 +25,7 @@ class Person():
         self.hand.append(card)
         if(check_card_value(card) == 11):
             self.aces += 1
+        return "Hit!"
 
 class Dealer(Person):
     def __init__(self):
@@ -39,9 +40,9 @@ class Player(Person):
         self.bet = 0
 
     def reset(self):
-        stack = self.stack
-        self.__init__()
-        self.stack = stack
+        self.hand = []
+        self.aces = 0
+        self.bet = 0
 
 class Deck():
     def __init__(self):
@@ -84,7 +85,7 @@ def check_hand_value(person):
     if type(person) == Dealer and person.show == False:
         return check_card_value(person.hand[0])
     else:
-        if person.aces > 0 and val >= 21:
+        if person.aces > 0 and val > 21:
             val -= 10 * person.aces
         return val
 
@@ -102,39 +103,35 @@ def player_stand(player, dealer, deck):
     player.stand = True
     dealer.show = True
     handle_dealer_hand(dealer, deck)
-    return "Player stands"
+    return "Stand!"
 
 def check_player_win(player, dealer):
     player_hand_val = check_hand_value(player)
     dealer_hand_val = check_hand_value(dealer)
 
-    if player_hand_val < dealer_hand_val and dealer_hand_val <= 21:
-        player.bet = 0
+    if player_hand_val < dealer_hand_val and dealer_hand_val <= 21 and dealer.show:
         return "You failed to beat the dealer. Better luck next time!"
     elif player_hand_val == 21:
         player.stack += player.bet * 1.5
-        player.bet = 0
         return "You hit 21. Congratulations!"
-    elif player_hand_val >= dealer_hand_val and player_hand_val < 21:
+    elif player_hand_val >= dealer_hand_val and player_hand_val < 21 and dealer.show:
         player.stack += player.bet * 2
-        player.bet = 0
         return "You beat the dealer. Congratulations!"
     elif player_hand_val > 21:
         return "Player busts! Better luck next time!"
     elif dealer_hand_val > 21:
         player.stack += player.bet * 2
-        player.bet = 0
         return "Dealer busts! Congratulations!"
     else:
         return "\n"
 
-def dealer_show_hand(dealer):
+def show_hand(person):
     hand = ""
-    if dealer.show:
-        for card in dealer.hand:
-            hand += f"{check_card_symbol(card)}{check_card_suit(card)} "
+    if type(person) == Dealer and not person.show:
+        hand += f"{check_card_symbol(person.hand[0])}{check_card_suit(person.hand[0])} ?"
     else:
-        hand += f"{check_card_symbol(dealer.hand[0])}{check_card_suit(dealer.hand[0])} ?"
+        for card in person.hand:
+            hand += f"{check_card_symbol(card)}{check_card_suit(card)} "
     return hand
 
 def check_card_value(card):
@@ -149,7 +146,7 @@ def check_card_value(card):
 def handle_dealer_hand(dealer, deck):
     while check_hand_value(dealer) < 17:
         dealer.hit(deck)
-        dealer_show_hand(dealer)
+        show_hand(dealer)
 
 def check_card_symbol(card):
     value = card % 13 + 2
@@ -174,16 +171,15 @@ def player_place_bet(player, dealer, deck):
     return msg
 
 def player_make_choice(player, dealer, deck):
-    system('clear')
-    print("What would you like to do?")
-    choice = input("options: hit, stand, stack, value (hand), count: ")
+    print("What would you like to do?", sep="")
+    choice = input("(hit, stand, stack):  ")
     msg = player_choice(choice, player, dealer, deck)
     print(msg)
     return msg
 
 def print_hands(player, dealer):
-    print(f"Player hand: {dealer_show_hand(player)} ({check_hand_value(player)})")
-    print(f"Dealer hand: {dealer_show_hand(dealer)} ({check_hand_value(dealer)})")    
+    print(f"Player hand: {show_hand(player)} ({check_hand_value(player)})")
+    print(f"Dealer hand: {show_hand(dealer)} ({check_hand_value(dealer)})")    
 
 if __name__ == "__main__":
     print_rules()
@@ -196,11 +192,14 @@ if __name__ == "__main__":
         while player_place_bet(player, dealer, deck) == "Invalid bet":
             player_place_bet(player, dealer, deck)
 
-        while player_make_choice(player, dealer, deck) != "Player stands":
-            player_make_choice(player, dealer, deck)
-            if check_player_win(player, dealer) != "\n":
-                break
-        
+        system('clear')
+        print_hands(player, dealer)
+
+        while player_make_choice(player, dealer, deck) != "Stand!" and check_player_win(player, dealer) == "\n":
+            print_hands(player, dealer)
+
+        dealer.show = True
+        print_hands(player, dealer)
         print(check_player_win(player, dealer))
 
         player.reset()
