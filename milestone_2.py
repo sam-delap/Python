@@ -59,8 +59,10 @@ class Deck():
 def player_bet(player, dealer, deck, bet):
     try:
         bet = int(bet)
+        if(bet > player.stack):
+            return "Can't bet more than your current stack"
     except ValueError:
-        return "Invalid bet"
+        return "Invalid bet. Bet must be an integer"
     else:
         player.stack -= bet
         player.bet += bet
