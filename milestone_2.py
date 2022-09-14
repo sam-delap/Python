@@ -62,7 +62,7 @@ class Dealer(Person):
         '''Display a formatted version of the dealer's hand'''
         if self.show:
             super().show_hand()
-        return f"{check_card_value(self.hand[0])}{check_card_symbol(self.hand[0])} ?"
+        return f"{check_card_symbol(self.hand[0])}{check_card_suit(self.hand[0])} ?"
 
     def deal_hand(self, deck):
         '''Handle the dealer's hand after the player stands'''
@@ -168,12 +168,6 @@ def check_card_value(card):
         return 10
 
     return 11
-
-def handle_dealer_hand(dealer, deck):
-    '''Handles the dealer's hand once the player stands'''
-    while dealer.hand_value() < 17:
-        dealer.hit(deck)
-        dealer.show_hand()
 
 def check_card_symbol(card):
     '''Checks the symbol of a card'''
