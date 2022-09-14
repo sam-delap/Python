@@ -10,10 +10,20 @@ class TestPeopleActions(unittest.TestCase):
         self.dealer = m2.Dealer()
         self.deck = m2.Deck()
 
-    def test_player_bet_errors_on_string(self):
-        '''If a player inputs a string to bet, there is an error'''
+    def test_player_bet_errors_on_word(self):
+        '''If a player inputs a word to bet, there is an error'''
         self.assertEqual(m2.player_bet(self.player, self.dealer, self.deck, "hi"),
         "Invalid bet. Bet must be an integer")
+
+    def test_player_bet_errors_on_decimal(self):
+        '''If a player inputs a decimal to bet, there is an error'''
+        self.assertEqual(m2.player_bet(self.player, self.dealer, self.deck, "5.4"),
+        "Invalid bet. Bet must be an integer")
+
+    def test_player_bet_works_on_str_int_input(self):
+        '''If a player inputs an int to bet, it works'''
+        self.assertEqual(m2.player_bet(self.player, self.dealer, self.deck, "5"),
+        "Bet placed")
 
     def test_player_cant_bet_more_than_stack(self):
         '''If a player bets more than they have, there is an error'''

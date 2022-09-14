@@ -61,7 +61,7 @@ class Dealer(Person):
     def show_hand(self):
         '''Display a formatted version of the dealer's hand'''
         if self.show:
-            super().show_hand()
+            return super().show_hand()
         return f"{check_card_symbol(self.hand[0])}{check_card_suit(self.hand[0])} ?"
 
     def deal_hand(self, deck):
@@ -89,10 +89,10 @@ class Deck():
     '''The deck. Represented by 52 cards.'''
     def __init__(self):
         self.cards = list(range(52))
+        random.shuffle(self.cards)
 
     def deal(self):
         '''Take a random card from the deck, without replacement'''
-        random.shuffle(self.cards)
         card = self.cards.pop()
         return card
 
@@ -146,16 +146,23 @@ def check_player_win(player, dealer):
     if player_hand_val < dealer_hand_val <= 21 and dealer.show:
         return "You failed to beat the dealer. Better luck next time!"
     if player_hand_val == 21:
-        player.stack += player.bet * 1.5
+        dealer.show = True
+        player.stack += player.bet * 2.5
+        player.stack = int(player.stack)
         return "You hit 21. Congratulations!"
-    if dealer_hand_val <= player_hand_val < 21 and dealer.show:
+    if dealer_hand_val < player_hand_val < 21 and dealer.show:
         player.stack += player.bet * 2
         return "You beat the dealer. Congratulations!"
     if player_hand_val > 21:
+        dealer.show = True
         return "Player busts! Better luck next time!"
     if dealer_hand_val > 21:
+        dealer.show = True
         player.stack += player.bet * 2
         return "Dealer busts! Congratulations!"
+    if player_hand_val == dealer_hand_val and dealer.show:
+        player.stack += player.bet
+        return "Push! Take your bet back."
     return "\n"
 
 def check_card_value(card):
@@ -214,19 +221,21 @@ if __name__ == "__main__":
     while(my_player.stack > 0 and my_player.play):
         my_dealer = Dealer()
         my_deck = Deck()
-        while player_place_bet(my_player, my_dealer, my_deck) == "Invalid bet":
-            player_place_bet(my_player, my_dealer, my_deck)
+        while player_place_bet(my_player, my_dealer, my_deck) == "Invalid bet. Bet must be an integer":
+            pass
 
         system('clear')
         print_hands(my_player, my_dealer)
+        if check_player_win(my_player, my_dealer) == "You hit 21. Congratulations!":
+            print(check_player_win(my_player, my_dealer))
+        else:
+            while player_make_choice(my_player, my_dealer, my_deck) != "Stand!" \
+                and check_player_win(my_player, my_dealer) == "\n":
+                print_hands(my_player, my_dealer)
 
-        while player_make_choice(my_player, my_dealer, my_deck) != "Stand!" \
-            and check_player_win(my_player, my_dealer) == "\n":
+            my_dealer.show = True
             print_hands(my_player, my_dealer)
-
-        my_dealer.show = True
-        print_hands(my_player, my_dealer)
-        print(check_player_win(my_player, my_dealer))
+            print(check_player_win(my_player, my_dealer))
 
         my_player.reset()
 
